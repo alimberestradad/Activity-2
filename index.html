@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tituladora de Proyectos - Administración UNASAM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen py-8 px-4 font-sans">
+  <div class="max-w-3xl mx-auto space-y-6">
+    <div class="text-center space-y-1">
+      <h1 class="text-3xl font-extrabold text-slate-900">Tituladora de Proyectos</h1>
+      <p class="text-sm text-slate-600">Escuela Profesional de Administración — UNASAM (Huaraz, Ancash)</p>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-5">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">1. Alcance</label>
+          <select id="alcance" onchange="cambiarAlcance()" class="w-full p-2.5 border rounded-xl text-sm font-semibold bg-blue-50/40">
+            <option value="correlacional" selected>Correlacional</option>
+            <option value="explicativo" >Explicativo</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase mb-1">2. Estructura de Variables</label>
+          <select id="diseno" onchange="cambiarDiseno()" class="w-full p-2.5 border rounded-xl text-sm font-semibold bg-indigo-50/40">
+            <option value="bivariada" selected>Bivariada (2 Variables)</option>
+            <option value="multivariada" >Multivariada (3+ Variables)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+        <div class="sm:col-span-5">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Inicio (Opcional)</label>
+          <select id="prefijo" onchange="renderizar()" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50"></select>
+        </div>
+        <div class="sm:col-span-7">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Variable 1 (V1)</label>
+          <input type="text" id="v1" value="Clima organizacional" oninput="renderizar()" class="w-full p-2.5 border rounded-lg text-sm font-medium">
+        </div>
+      </div>
+
+      <div id="bloqueMulti" class="hidden bg-amber-50/70 p-3.5 rounded-xl border border-amber-200 space-y-2">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-amber-900">Variables Independientes Adicionales</span>
+          <button type="button" onclick="agregarVar()" class="text-xs font-bold text-amber-700">+ Agregar Variable</button>
+        </div>
+        <div id="listaVarsExtra" class="space-y-2">
+          
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+        <div class="sm:col-span-5">
+          <label class="block text-xs font-semibold text-blue-700 mb-1">Conector V1 - V2</label>
+          <select id="cV2" onchange="renderizar()" class="w-full p-2.5 border border-blue-300 rounded-lg text-sm bg-blue-50/40 font-medium text-blue-900"></select>
+        </div>
+        <div class="sm:col-span-7">
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Variable 2 / Dependiente (V2)</label>
+          <input type="text" id="v2" value="Desempeño laboral" oninput="renderizar()" class="w-full p-2.5 border rounded-lg text-sm font-medium">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Población</label>
+          <input type="text" id="poblacion" value="trabajadores administrativos" oninput="renderizar()" class="w-full p-2.5 border rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Organización / Empresa</label>
+          <input type="text" id="organizacion" value="UNASAM" oninput="renderizar()" class="w-full p-2.5 border rounded-lg text-sm">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Lugar</label>
+          <input type="text" id="lugar" value="Independencia, Huaraz" oninput="renderizar()" class="w-full p-2.5 border rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Año</label>
+          <input type="text" id="anio" value="2026" oninput="renderizar()" class="w-full p-2.5 border rounded-lg text-sm">
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">Título Generado (Sin punto final)</span>
+        <button type="button" onclick="copiar()" class="text-xs font-bold bg-blue-600 text-white px-3 py-1.5 rounded-lg">Copiar Título</button>
+      </div>
+      <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+        <p id="tituloResultado" class="text-lg font-bold text-slate-900 leading-relaxed"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const opciones = {
+      correlacional: {
+        prefijos: ['', 'Relación entre', 'Correlación entre', 'Asociación entre'],
+        conectores: ['y su relación con', 'relacionado con', 'y su correlación con', 'y']
+      },
+      explicativo: {
+        prefijos: ['', 'Influencia de', 'Efecto de', 'Impacto de', 'Incidencia de'],
+        conectores: ['y su influencia en', 'y su impacto en', 'y su efecto sobre', 'como factor determinante en', 'y su incidencia en']
+      }
+    };
+
+    function cambiarAlcance() {
+      const alc = document.getElementById('alcance').value;
+      const selPref = document.getElementById('prefijo');
+      const selCon = document.getElementById('cV2');
+
+      selPref.innerHTML = opciones[alc].prefijos.map(p => '<option value="' + p + '">' + (p || '(Ninguno / Directo)') + '</option>').join('');
+      selCon.innerHTML = opciones[alc].conectores.map(c => '<option value="' + c + '">... ' + c + '</option>').join('');
+      renderizar();
+    }
+
+    function cambiarDiseno() {
+      const dis = document.getElementById('diseno').value;
+      document.getElementById('bloqueMulti').className = dis === 'multivariada'
+        ? 'bg-amber-50/70 p-3.5 rounded-xl border border-amber-200 space-y-2'
+        : 'hidden';
+      renderizar();
+    }
+
+    function agregarVar() {
+      const cont = document.getElementById('listaVarsExtra');
+      const div = document.createElement('div');
+      div.className = 'flex gap-2';
+      div.innerHTML = '<input type="text" class="varExtra w-full p-2 border rounded text-xs bg-white" oninput="renderizar()"><button type="button" onclick="this.parentElement.remove(); renderizar();" class="text-red-500 font-bold px-2">×</button>';
+      cont.appendChild(div);
+      renderizar();
+    }
+
+    function renderizar() {
+      const dis = document.getElementById('diseno').value;
+      const pref = document.getElementById('prefijo').value;
+      const v1 = document.getElementById('v1').value.trim();
+      const cV2 = document.getElementById('cV2').value;
+      const v2 = document.getElementById('v2').value.trim();
+      const pob = document.getElementById('poblacion').value.trim();
+      const org = document.getElementById('organizacion').value.trim();
+      const lug = document.getElementById('lugar').value.trim();
+      const ani = document.getElementById('anio').value.trim();
+
+      const extras = dis === 'multivariada'
+        ? Array.from(document.querySelectorAll('.varExtra')).map(i => i.value.trim()).filter(Boolean)
+        : [];
+
+      const listaV1 = [v1, ...extras].filter(Boolean);
+      const bloqueV1 = listaV1.length > 1 ? listaV1.slice(0, -1).join(', ') + ' y ' + listaV1[listaV1.length - 1] : (listaV1[0] || '');
+
+      const partes = [];
+      if (bloqueV1) partes.push(pref ? pref + ' ' + bloqueV1 : bloqueV1);
+      if (v2) {
+        if (pref.startsWith('Relación') || pref.startsWith('Correlación') || pref.startsWith('Asociación')) {
+          partes.push('y ' + v2);
+        } else {
+          partes.push(cV2 + ' ' + v2);
+        }
+      }
+      if (pob) partes.push('de los ' + pob);
+      if (org) partes.push('de la ' + org);
+      if (lug) partes.push('del distrito de ' + lug);
+      if (ani) {
+        if (partes.length > 0) partes[partes.length - 1] += ', ' + ani;
+        else partes.push(ani);
+      }
+
+      let res = partes.join(' ');
+      if (res) res = res.charAt(0).toUpperCase() + res.slice(1);
+      while (res.endsWith('.') || res.endsWith(',') || res.endsWith(' ')) res = res.slice(0, -1).trim();
+
+      document.getElementById('tituloResultado').innerText = res || 'Ingresa los datos para formular el título.';
+    }
+
+    function copiar() {
+      const txt = document.getElementById('tituloResultado').innerText;
+      const ta = document.createElement('textarea');
+      ta.value = txt;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+
+    window.onload = cambiarAlcance;
+  </script>
+</body>
+</html>
